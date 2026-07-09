@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "tronscan": {
+      "command": "npx",
+      "args": [
+        "mcp-remote",
+        "https://mcp.tronscan.org/mcp",
+        "--transport",
+        "http-only",
+        "--header",
+        "Content-Type: application/json",
+        "--header",
+        "Accept:application/json, text/event-stream"
+      ]
+    }
+  }
+}
