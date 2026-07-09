@@ -10,7 +10,7 @@
         "--header",
         "Content-Type: application/json",
         "--header",
-        "Accept:application/json, text/event-stream"
+        "Accept: application/json, text/event-stream"
       ]
     }
   }
