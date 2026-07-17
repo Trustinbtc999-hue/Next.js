@@ -12,8 +12,6 @@ import streamlit as st
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CONFIG_PATH = os.path.join(ROOT, "cline_mcp_config.json")
 DATA_PATH = os.path.join(ROOT, "data", "atlantis.csv")
-SORT_PATH = os.path.join(ROOT, "gnome_sort.py")
-
 # ── page config ────────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="System UI",
