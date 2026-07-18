@@ -16,7 +16,7 @@ updates:
 # Matches: docs/foo.json, docs/bar.json
 
 # Pattern: *.lock
-# Matches: Gemfile.lock, package.lock, foo.lock (in any directory)
+# Matches: Gemfile.lock, package-lock.json, foo.lock (in any directory)
 
 # Pattern: test/**
 # Matches: test/foo.rb, test/bar/baz.rb, test/any/depth/file.txt
