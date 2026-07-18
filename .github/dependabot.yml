@@ -10,7 +10,7 @@ updates:
       - "src/*.js"
       - "src/test/helper.js"
 
-# Sample patterns that can be used-
+# Sample patterns that can be used
 
 # Pattern: docs/*.json
 # Matches: docs/foo.json, docs/bar.json
