@@ -24,7 +24,7 @@ st.set_page_config(
 st.sidebar.title("🛠️ System UI")
 page = st.sidebar.radio(
     "Navigate",
-    ["Dashboard", "MCP Servers", "Population Data", "Gnome Sort"],
+    ["Dashboard", "MCP Servers", "Population Data", "Gnome Sort", "CryptoDesk"],
 )
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -213,3 +213,101 @@ elif page == "Gnome Sort":
                 plt.close(fig)
         except ValueError:
             st.error("Please enter valid integers separated by commas.")
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CryptoDesk
+# ══════════════════════════════════════════════════════════════════════════════
+elif page == "CryptoDesk":
+    import datetime
+    import random
+
+    st.title("CryptoDesk")
+    st.caption("Simulated cryptocurrency market data — refreshed each session.")
+
+    # ── deterministic-ish seed so values look stable within a session ──────────
+    _seed = int(datetime.date.today().strftime("%Y%m%d"))
+    rng = random.Random(_seed)
+
+    COINS = [
+        {"symbol": "BTC", "name": "Bitcoin",  "base": 67_000},
+        {"symbol": "ETH", "name": "Ethereum", "base": 3_500},
+        {"symbol": "SOL", "name": "Solana",   "base": 160},
+        {"symbol": "BNB", "name": "BNB",       "base": 590},
+        {"symbol": "XRP", "name": "XRP",       "base": 0.62},
+        {"symbol": "ADA", "name": "Cardano",   "base": 0.45},
+    ]
+
+    def _sim_price(base: float) -> float:
+        return round(base * (1 + rng.uniform(-0.05, 0.05)), 6)
+
+    def _sim_change() -> float:
+        return round(rng.uniform(-8.0, 8.0), 2)
+
+    def _sim_volume(base: float) -> float:
+        return round(base * rng.uniform(0.8e6, 2.5e6) / base, 2) * base
+
+    rows = []
+    for c in COINS:
+        price = _sim_price(c["base"])
+        chg = _sim_change()
+        vol = _sim_volume(c["base"])
+        rows.append(
+            {
+                "Symbol": c["symbol"],
+                "Name": c["name"],
+                "Price (USD)": price,
+                "24h Change %": chg,
+                "Volume (USD)": vol,
+            }
+        )
+
+    df_crypto = pd.DataFrame(rows)
+
+    # ── top metrics ────────────────────────────────────────────────────────────
+    cols = st.columns(len(COINS))
+    for col, row in zip(cols, rows):
+        delta_str = f"{row['24h Change %']:+.2f}%"
+        col.metric(
+            label=row["Symbol"],
+            value=f"${row['Price (USD)']:,.4f}" if row["Price (USD)"] < 10 else f"${row['Price (USD)']:,.2f}",
+            delta=delta_str,
+        )
+
+    st.divider()
+
+    # ── simulated price history chart ─────────────────────────────────────────
+    st.subheader("Simulated 30-day Price History")
+    selected = st.selectbox("Select coin", [c["symbol"] for c in COINS])
+    base_price = next(c["base"] for c in COINS if c["symbol"] == selected)
+
+    hist_rng = random.Random(_seed + hash(selected))
+    days = list(range(-29, 1))
+    prices_hist = []
+    p = base_price * (1 + hist_rng.uniform(-0.15, 0.15))
+    for _ in days:
+        p = p * (1 + hist_rng.uniform(-0.04, 0.04))
+        prices_hist.append(round(p, 6))
+
+    fig2, ax2 = plt.subplots(figsize=(10, 3))
+    color = "#f7931a" if selected == "BTC" else "#627eea" if selected == "ETH" else "#4f8bf9"
+    ax2.plot(days, prices_hist, color=color, linewidth=2)
+    ax2.fill_between(days, prices_hist, alpha=0.15, color=color)
+    ax2.set_xlabel("Days ago → today")
+    ax2.set_ylabel("Price (USD)")
+    ax2.set_title(f"{selected} — Last 30 Days (Simulated)")
+    ax2.grid(True, alpha=0.3)
+    plt.tight_layout()
+    st.pyplot(fig2)
+    plt.close(fig2)
+
+    st.divider()
+
+    # ── data table ────────────────────────────────────────────────────────────
+    st.subheader("Market Overview")
+
+    def _colour_change(val: float) -> str:
+        colour = "green" if val >= 0 else "red"
+        return f"color: {colour}"
+
+    styled = df_crypto.style.applymap(_colour_change, subset=["24h Change %"])
+    st.dataframe(styled, use_container_width=True)
